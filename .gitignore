@@ -32,7 +32,10 @@
 *.app
 
 #Debug
-Debug/*
+Debug/
+NetServer/Debug/
+NetClient/Debug/
+NetCommon/Debug/
 
 #.vs
 .vs/
