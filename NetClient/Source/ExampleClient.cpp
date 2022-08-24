@@ -26,6 +26,15 @@ public:
 
 		Send(msg);
 	}
+
+	void MessageAll()
+	{
+		NET::message<MessageTypes> msg;
+
+		msg.header.id = MessageTypes::MESSAGEALL;
+
+		Send(msg);
+	}
 };
 
 int main()
@@ -44,15 +53,18 @@ int main()
 	{
 		if (GetForegroundWindow() == GetConsoleWindow())
 		{
-			key[0] = GetAsyncKeyState('1') & 0x8000;
+			key[0] = GetAsyncKeyState('1');
 
-			key[0] = GetAsyncKeyState('2') & 0x8000;
+			key[1] = GetAsyncKeyState('2');
 
-			key[0] = GetAsyncKeyState('3') & 0x8000;
+			key[2] = GetAsyncKeyState('3');
 		}
 
 		if (key[0] && !old_key[0])
 			Client.PingServer();
+
+		if (key[1] && !old_key[1])
+			Client.MessageAll();
 
 		if (key[2] && !old_key[2])
 			bQuit = true;
@@ -68,6 +80,12 @@ int main()
 
 				switch (msg.header.id)
 				{
+
+				case MessageTypes::ACCEPT:
+				{
+					std::cout << "Server Accepted connection!" << std::endl;
+				}
+				break;
 				case MessageTypes::PING:
 				{
 					std::chrono::system_clock::time_point timeNow = std::chrono::system_clock::now();
@@ -77,6 +95,16 @@ int main()
 					msg >> timeThen;
 
 					std::cout << "PING:" << std::chrono::duration<double>(timeNow - timeThen).count() << std::endl;
+				}
+				break;
+
+				case MessageTypes::MESSAGEALL:
+				{
+					uint32_t clientID;
+
+					msg >> clientID;
+
+					std::cout << "Hello from [" << clientID << "]" << std::endl;
 				}
 				break;
 				}

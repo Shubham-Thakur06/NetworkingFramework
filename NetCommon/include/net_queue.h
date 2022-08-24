@@ -36,6 +36,10 @@ namespace NET
 			std::scoped_lock lock(QueueMux);
 
 			QueueDeq.emplace_back(std::move(Item));
+
+			std::unique_lock<std::mutex> ul(muxBlocking);
+
+			cvBlocking.notify_one();
 		}
 
 		void push_front(const T& Item)
@@ -43,6 +47,10 @@ namespace NET
 			std::scoped_lock lock(QueueMux);
 
 			QueueDeq.emplace_front(std::move(Item));
+
+			std::unique_lock<std::mutex> ul(muxBlocking);
+
+			cvBlocking.notify_one();
 		}
 
 		bool empty()
@@ -88,9 +96,23 @@ namespace NET
 			return t;
 		}
 
+		void wait()
+		{
+			while (empty())
+			{
+				std::unique_lock<std::mutex> ul(muxBlocking);
+
+				cvBlocking.wait(ul);
+			}
+		}
+
 	protected:
 		std::mutex QueueMux;
 
 		std::deque<T> QueueDeq;
+
+		std::condition_variable cvBlocking;
+
+		std::mutex muxBlocking;
 	};
 }

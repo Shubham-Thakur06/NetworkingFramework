@@ -23,13 +23,19 @@ public:
 protected:
 	virtual bool OnClientConnect(std::shared_ptr<NET::connection<MessageTypes>> client) override
 	{
+		NET::message<MessageTypes> msg;
+
+		msg.header.id = MessageTypes::ACCEPT;
+
+		client->Send(msg);
+
 		return true;
 	}
 
 	//Called when a client appears to have disconnected
 	virtual void OnClientDisconnect(std::shared_ptr<NET::connection<MessageTypes>> client) override
 	{
-
+		std::cout << "Removing client [" << client->GetID() << "]" << std::endl;
 	}
 
 	virtual void OnMessage(std::shared_ptr<NET::connection<MessageTypes>> client, NET::message<MessageTypes>& msg) override
@@ -41,6 +47,19 @@ protected:
 			std::cout << "[" << client->GetID() << "]: PING" << std::endl;
 
 			client->Send(msg);
+		}
+		break;
+		case MessageTypes::MESSAGEALL:
+		{
+			std::cout << "[" << client->GetID() << "]: Message All" << std::endl;
+
+			NET::message<MessageTypes> msg;
+
+			msg.header.id = MessageTypes::MESSAGEALL;
+
+			msg << client->GetID();
+
+			MessageAllClients(msg, client);
 		}
 		break;
 		}
@@ -55,7 +74,7 @@ int main()
 
 	while (1)
 	{
-		server.Update();
+		server.Update(-1, true);
 	}
 
 	return 0;

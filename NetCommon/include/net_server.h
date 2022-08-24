@@ -75,7 +75,7 @@ namespace NET
 							//Allowed connections addd to the connections deque of new connections
 							m_connectionsDeq.push_back(std::move(newconn));
 
-							m_connectionsDeq.back()->ConnectToClient(nIDCounter++);
+							m_connectionsDeq.back()->ConnectToClient(this, nIDCounter++);
 
 							std::cout << "[" << m_connectionsDeq.back()->GetID() << "] Connection approved!" << std::endl;
 						}
@@ -126,7 +126,7 @@ namespace NET
 			for (auto& client : m_connectionsDeq)
 			{
 
-				if (client && client->IsConnnected())
+				if (client && client->IsConnected())
 				{
 					if (client != pIgnoredClient)
 						client->Send(msg);
@@ -151,8 +151,11 @@ namespace NET
 			}
 		}
 
-		void Update(size_t nMaxMessages = -1)
+		void Update(size_t nMaxMessages = -1, bool bWait = false)
 		{
+			if (bWait)
+				m_qMessageIn.wait();
+
 			size_t nMessageCount = 0;
 
 			while (nMessageCount < nMaxMessages && !m_qMessageIn.empty())
@@ -165,6 +168,11 @@ namespace NET
 			}
 		}
 
+		virtual void OnClientValidate(std::shared_ptr<connection<T>> client)
+		{
+
+		}
+
 	protected:
 		//Called when a client connects, you can veto the connection by returning false
 		virtual bool OnClientConnect(std::shared_ptr<connection<T>> client)
@@ -175,7 +183,7 @@ namespace NET
 		//Called when a client appears to be disconnected
 		virtual void OnClientDisconnect(std::shared_ptr<connection<T>> client)
 		{
-
+			
 		}
 
 		//Called on message arrives

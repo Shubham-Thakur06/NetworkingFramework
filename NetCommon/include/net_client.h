@@ -89,6 +89,17 @@ namespace NET
 		//The client has a single instace of a "connection" object, which handles data transfer
 		std::unique_ptr<connection<T>> m_connection;
 
+		void Send(message<T> msg)
+		{
+			if (m_connection)
+			{
+				if (m_connection->IsConnected())
+				{
+					m_connection->Send(msg);
+				}
+			}
+		}
+
 	private:
 		//This is the thread safe queue of incoming messages from the server
 		Queue<owned_message<T>> m_qMessagesIn;

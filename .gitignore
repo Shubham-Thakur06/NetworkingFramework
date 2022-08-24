@@ -33,9 +33,9 @@
 
 #Debug
 Debug/
-NetServer/Debug/
-NetClient/Debug/
-NetCommon/Debug/
+NetServer/Debug/*
+NetClient/Debug/*
+NetCommon/Debug/*
 
 #.vs
 .vs/
